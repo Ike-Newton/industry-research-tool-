@@ -18,16 +18,41 @@ import os
 import sys
 
 import feishu
+import llm
 import tasks
 
 OUT_DIR = "out"
+
+# Windows 控制台默认是 GBK：文本里出现 BOM、生僻字或 emoji 时，print 本身就会抛
+# UnicodeEncodeError 把程序打断。这里强制 UTF-8 输出，无法编码的字符降级替换。
+for _stream in (sys.stdout, sys.stderr):
+    try:
+        _stream.reconfigure(encoding="utf-8", errors="replace")
+    except Exception:
+        pass
+
+# 依次尝试：带 BOM 的 UTF-8 → 普通 UTF-8 → GBK/GB18030（Windows 记事本"ANSI"就是这个）
+READ_ENCODINGS = ("utf-8-sig", "utf-8", "gb18030")
+
+
+class InputError(RuntimeError):
+    """输入不可用（文件缺失 / 编码识别不了），消息直接给用户看。"""
 
 
 def _read_text(args) -> str:
     if args.text:
         return args.text
-    with open(args.input, "r", encoding="utf-8") as f:
-        return f.read()
+    path = args.input
+    if not os.path.exists(path):
+        raise InputError("找不到输入文件：%s（检查路径，或用 --text 直接传一段文本）" % path)
+
+    raw = open(path, "rb").read()
+    for enc in READ_ENCODINGS:
+        try:
+            return raw.decode(enc)
+        except UnicodeDecodeError:
+            continue
+    raise InputError("无法识别文件编码：%s（支持 UTF-8 / UTF-8-BOM / GBK）" % path)
 
 
 # ---------------------------------------------------------------- 渲染
@@ -101,8 +126,22 @@ def main() -> int:
     if not args.text and not args.input:
         p.error("需要 --input 或 --text")
 
-    text = _read_text(args)
-    result = tasks.TASKS[args.task](text, offline=args.offline)
+    try:
+        text = _read_text(args)
+    except InputError as e:
+        print("错误：" + str(e), file=sys.stderr)
+        return 2
+
+    if not args.offline and not llm.has_api_key():
+        print("提示：未检测到 LLM_API_KEY，已自动改用规则模式（抽取质量低于模型模式）。"
+              "要调模型请先设置 LLM_API_KEY。", file=sys.stderr)
+
+    try:
+        result = tasks.TASKS[args.task](text, offline=args.offline)
+    except llm.LLMError as e:
+        print("模型调用失败：" + str(e), file=sys.stderr)
+        print("可以先加 --offline 用规则模式确认流程跑通。", file=sys.stderr)
+        return 4
     body, card_lines = RENDERERS[args.task](result)
 
     os.makedirs(args.out_dir, exist_ok=True)
@@ -122,7 +161,12 @@ def main() -> int:
     print("\n已写出：" + "、".join(os.path.abspath(x) for x in wrote))
 
     if args.feishu:
-        feishu.send_card("%s｜%s" % (args.task, "规则模式" if args.offline else "模型模式"), card_lines)
+        try:
+            feishu.send_card("%s｜%s" % (args.task, "规则模式" if args.offline else "模型模式"), card_lines)
+        except feishu.FeishuError as e:
+            print("飞书推送失败：" + str(e), file=sys.stderr)
+            print("（结果已写入本地文件，不影响使用）", file=sys.stderr)
+            return 3
         print("已推送飞书")
     return 0
 
