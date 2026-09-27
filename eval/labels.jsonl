@@ -1,0 +1,8 @@
+{"text": "示例公司甲（智能驾驶）于2026-08-12宣布完成A轮融资，金额近亿元，投资方为示例资本、示例创投。", "expected": {"company": "示例公司甲", "industry": "智能驾驶", "round": "A轮", "amount": "近亿元", "investors": "示例资本、示例创投", "date": "2026-08-12"}}
+{"text": "示例公司乙（企业服务）2026年7月完成天使轮融资，金额数千万人民币，由示例天使基金投资。", "expected": {"company": "示例公司乙", "industry": "企业服务", "round": "天使轮", "amount": "数千万人民币", "investors": "示例天使基金", "date": "2026年7月"}}
+{"text": "示例公司丙（先进制造）宣布完成B轮融资，金额未披露，投资方为示例产业基金。", "expected": {"company": "示例公司丙", "industry": "先进制造", "round": "B轮", "amount": "未披露", "investors": "示例产业基金", "date": null}}
+{"text": "示例公司丁（新能源）2026-06-30完成战略融资，金额1.5亿元，投资方为示例能源集团。", "expected": {"company": "示例公司丁", "industry": "新能源", "round": "战略融资", "amount": "1.5亿元", "investors": "示例能源集团", "date": "2026-06-30"}}
+{"text": "示例公司戊宣布完成Pre-A轮融资，金额超5000万元，由示例创投领投，2026-05-20披露。", "expected": {"company": "示例公司戊", "industry": null, "round": "Pre-A轮", "amount": "超5000万元", "investors": "示例创投", "date": "2026-05-20"}}
+{"text": "示例公司己（半导体）完成C轮融资，金额约3亿美元，投资方包括示例国际、示例资本，2026-04-08。", "expected": {"company": "示例公司己", "industry": "半导体", "round": "C轮", "amount": "约3亿美元", "investors": "示例国际、示例资本", "date": "2026-04-08"}}
+{"text": "示例公司庚（消费）完成种子轮融资，金额数百万元，投资方为示例种子基金。", "expected": {"company": "示例公司庚", "industry": "消费", "round": "种子轮", "amount": "数百万元", "investors": "示例种子基金", "date": null}}
+{"text": "示例公司辛（医疗）于2026-03-15宣布完成D轮融资，金额未披露，由示例医疗基金领投。", "expected": {"company": "示例公司辛", "industry": "医疗", "round": "D轮", "amount": "未披露", "investors": "示例医疗基金", "date": "2026-03-15"}}
